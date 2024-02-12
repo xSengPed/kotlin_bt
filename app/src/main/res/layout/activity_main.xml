@@ -25,10 +25,10 @@
         <!--            android:layout_height="match_parent"-->
         <!--            tools:listitem="@layout/list_item" />-->
         <Button
-            android:id="@+id/connect_bnt"
+            android:id="@+id/scan_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connect To Target" />
+            android:text="Scan for Targets" />
         <Button
             android:id="@+id/sending_test"
             android:layout_width="match_parent"
