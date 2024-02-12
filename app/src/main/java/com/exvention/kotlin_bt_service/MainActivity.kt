@@ -82,7 +82,16 @@ class BleManager(context: Context) {
         bluetoothGatt?.disconnect()
     }
 }
+
+
 class MainActivity : AppCompatActivity() {
+    private val SCAN_PERIOD: Long = 10000
+    private var mScanning: Boolean = false
+    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+    private lateinit var handler: Handler
+    private lateinit var listView: ListView
+    private lateinit var listAdapter: ArrayAdapter<String>
+    private val deviceList = ArrayList<String>()
 
     private val REQUEST_ACCESS_FINE_LOCATION = 1
     private val REQUEST_ACCESS_BLUETOOTH_CONNECT = 1
@@ -107,6 +116,61 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {
                 // Ignore all other requests
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun scanLeDevice(enable: Boolean) {
+        when (enable) {
+            true -> {
+                handler.postDelayed({
+                    mScanning = false
+                    bluetoothLeScanner.stopScan(leScanCallback)
+                }, SCAN_PERIOD)
+
+                mScanning = true
+                bluetoothLeScanner.startScan(leScanCallback)
+            }
+            else -> {
+                mScanning = false
+                bluetoothLeScanner.stopScan(leScanCallback)
+            }
+        }
+    }
+    private val leScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+            addDevice(result.device)
+            Log.d("ScanCallback", "onScanResult: ${result.device}")
+        }
+    }
+
+
+
+    @SuppressLint("MissingPermission")
+    private fun addDevice(device: BluetoothDevice) {
+        val deviceName = device.name ?: "Unknown Device"
+        val deviceAddress = device.address
+        val deviceString = "$deviceName - $deviceAddress"
+        if (!deviceList.contains(deviceString)) {
+            deviceList.add(deviceString)
+            listAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private lateinit var bluetoothGatt: BluetoothGatt
+
+    private val gattCallback = object : BluetoothGattCallback() {
+        @SuppressLint("MissingPermission")
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    gatt.discoverServices()
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    gatt.close()
+                }
             }
         }
     }
@@ -144,15 +208,17 @@ class MainActivity : AppCompatActivity() {
             val bleManager = BleManager(this)
             bleManager.sendCharacteristic()
         }
-//        handler = Handler(Looper.getMainLooper())
+
+        handler = Handler(Looper.getMainLooper())
+
 //        listView = findViewById(R.id.listView)
 //        listAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, deviceList)
 //        listView.adapter = listAdapter
-//
-//        val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-//        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-//
-//        scanLeDevice(true)
+
+        val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+
+        scanLeDevice(true)
 
     }
 
