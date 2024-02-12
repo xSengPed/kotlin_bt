@@ -30,9 +30,14 @@
             android:layout_height="wrap_content"
             android:text="Scan for Targets" />
         <Button
-            android:id="@+id/sending_test"
+            android:id="@+id/connect_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test Send Data" />
+            android:text="Connect To Target" />
+        <Button
+            android:id="@+id/send_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send To ESP" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
